@@ -4,31 +4,38 @@
 let video;
 let handPose;
 let hands = [];
+let circleX, circleY, circleRadius = 100;
+let isCircleGrabbed = false;
 
 function preload() {
   // Initialize HandPose model with flipped video input
   handPose = ml5.handPose({ flipped: true });
 }
 
-function mousePressed() {
-  console.log(hands);
+function setup() {
+  createCanvas(640, 480); // 產生畫布
+  video = createCapture(VIDEO, { flipped: true });
+  video.hide();
+
+  // Start detecting hands
+  handPose.detectStart(video, gotHands);
+
+  // 初始化圓的位置
+  circleX = width / 2;
+  circleY = height / 2;
 }
 
 function gotHands(results) {
   hands = results;
 }
 
-function setup() {
-  createCanvas(640, 480); //產生一個畫布
-  video = createCapture(VIDEO, { flipped: true });
-  video.hide();
-
-  // Start detecting hands
-  handPose.detectStart(video, gotHands);
-}
-
 function draw() {
   image(video, 0, 0); // 顯示相機畫面
+
+  // 繪製圓
+  fill(0, 0, 255, 100);
+  noStroke();
+  circle(circleX, circleY, circleRadius * 2);
 
   // 確保至少偵測到一隻手
   if (hands.length > 0) {
@@ -37,20 +44,8 @@ function draw() {
         // 繪製手部的線條
         drawHandLines(hand);
 
-        // 繪製每個關鍵點
-        for (let i = 0; i < hand.keypoints.length; i++) {
-          let keypoint = hand.keypoints[i];
-
-          // 根據左右手設定顏色
-          if (hand.handedness == "Left") {
-            fill(255, 0, 255); // 左手顏色
-          } else {
-            fill(255, 255, 0); // 右手顏色
-          }
-
-          noStroke();
-          circle(keypoint.x, keypoint.y, 16); // 繪製圓點
-        }
+        // 檢查是否抓住圓
+        checkCircleGrab(hand);
       }
     }
   }
@@ -78,5 +73,34 @@ function drawHandLines(hand) {
         line(start.x, start.y, end.x, end.y); // 畫線
       }
     }
+  }
+
+  // 繪製每個關鍵點
+  for (let i = 0; i < hand.keypoints.length; i++) {
+    let keypoint = hand.keypoints[i];
+    fill(255, 0, 0);
+    noStroke();
+    circle(keypoint.x, keypoint.y, 10); // 繪製圓點
+  }
+}
+
+function checkCircleGrab(hand) {
+  let indexFinger = hand.keypoints[8]; // 食指
+  let thumb = hand.keypoints[4]; // 大拇指
+
+  // 計算食指和大拇指是否同時觸碰圓的邊緣
+  let indexDist = dist(indexFinger.x, indexFinger.y, circleX, circleY);
+  let thumbDist = dist(thumb.x, thumb.y, circleX, circleY);
+
+  if (indexDist < circleRadius && thumbDist < circleRadius) {
+    isCircleGrabbed = true;
+  } else {
+    isCircleGrabbed = false;
+  }
+
+  // 如果抓住圓，讓圓跟隨手指移動
+  if (isCircleGrabbed) {
+    circleX = (indexFinger.x + thumb.x) / 2;
+    circleY = (indexFinger.y + thumb.y) / 2;
   }
 }
