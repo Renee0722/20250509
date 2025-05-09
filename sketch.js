@@ -36,7 +36,9 @@ function draw() {
   image(video, 0, 0); // 顯示相機畫面
 
   // 繪製圓
-  fill(0, 0, 255, 100); // 圓的顏色為藍色
+  if (!isCircleGrabbed) {
+    fill(0, 0, 255, 100); // 預設圓的顏色為藍色
+  }
   noStroke();
   circle(circleX, circleY, circleRadius * 2);
 
@@ -111,6 +113,13 @@ function checkCircleGrab(hand) {
     // 如果抓住圓，讓圓跟隨手指移動
     circleX = (indexFinger.x + thumb.x) / 2;
     circleY = (indexFinger.y + thumb.y) / 2;
+
+    // 根據左右手改變大圓顏色
+    if (hand.handedness === "Left") {
+      fill(0, 255, 0, 100); // 左手：綠色
+    } else if (hand.handedness === "Right") {
+      fill(255, 0, 0, 100); // 右手：紅色
+    }
 
     // 畫出圓心的軌跡
     if (previousCircleX !== null && previousCircleY !== null) {
