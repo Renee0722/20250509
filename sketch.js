@@ -19,7 +19,7 @@ function gotHands(results) {
 }
 
 function setup() {
-  createCanvas(640, 480); //產生一個畫布，640*480
+  createCanvas(640, 480); //產生一個畫布
   video = createCapture(VIDEO, { flipped: true });
   video.hide();
 
