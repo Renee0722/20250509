@@ -10,67 +10,45 @@ function preload() {
   handPose = ml5.handPose({ flipped: true });
 }
 
-function setup() {
-  // 設定相機尺寸
-  video = createCapture(VIDEO); // 啟用相機
-  video.size(800, 600); // 設定相機畫面大小
-  video.hide(); // 隱藏原始相機畫面
-
-  // 使用相機的寬高來設定畫布大小
-  createCanvas(video.width, video.height);
-
-  // 啟用 HandPose 並設定回呼函式
-  handPose.on("predict", gotHands);
+function mousePressed() {
+  console.log(hands);
 }
 
 function gotHands(results) {
-  hands = results; // 更新偵測到的手部資料
+  hands = results;
+}
+
+function setup() {
+  createCanvas(640, 480); //產生一個畫布，640*480
+  video = createCapture(VIDEO, { flipped: true });
+  video.hide();
+
+  // Start detecting hands
+  handPose.detectStart(video, gotHands);
 }
 
 function draw() {
-  // 顯示相機畫面
-  image(video, 0, 0); 
+  image(video, 0, 0);
 
-  // 確保至少偵測到一隻手
+  // Ensure at least one hand is detected
   if (hands.length > 0) {
     for (let hand of hands) {
       if (hand.confidence > 0.1) {
-        // 繪製手部的線條
-        drawHandLines(hand);
+        // Loop through keypoints and draw circles
+        for (let i = 0; i < hand.keypoints.length; i++) {
+          let keypoint = hand.keypoints[i];
+
+          // Color-code based on left or right hand
+          if (hand.handedness == "Left") {
+            fill(255, 0, 255);
+          } else {
+            fill(255, 255, 0);
+          }
+
+          noStroke();
+          circle(keypoint.x, keypoint.y, 16);
+        }
       }
     }
-  }
-}
-
-function drawHandLines(hand) {
-  // 定義分組範圍
-  let groups = [
-    [0, 1, 2, 3, 4],   // 編號 0 到 4
-    [5, 6, 7, 8],      // 編號 5 到 8
-    [9, 10, 11, 12],   // 編號 9 到 12
-    [13, 14, 15, 16],  // 編號 13 到 16
-    [17, 18, 19, 20]   // 編號 17 到 20
-  ];
-
-  // 遍歷每個分組，畫出線條
-  for (let group of groups) {
-    for (let i = 0; i < group.length - 1; i++) {
-      let start = hand.annotations[group[i]];
-      let end = hand.annotations[group[i + 1]];
-
-      if (start && end) {
-        stroke(0, 255, 0); // 設定線條顏色
-        strokeWeight(2);   // 設定線條粗細
-        line(start[0][0], start[0][1], end[0][0], end[0][1]); // 畫線
-      }
-    }
-  }
-
-  // 繪製每個關鍵點
-  for (let i = 0; i < hand.landmarks.length; i++) {
-    let keypoint = hand.landmarks[i];
-    fill(255, 0, 0); // 設定點的顏色
-    noStroke();
-    circle(keypoint[0], keypoint[1], 10); // 繪製圓點
   }
 }
