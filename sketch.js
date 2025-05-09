@@ -78,7 +78,14 @@ function drawHandLines(hand) {
   // 繪製每個關鍵點
   for (let i = 0; i < hand.keypoints.length; i++) {
     let keypoint = hand.keypoints[i];
-    fill(255, 0, 0);
+
+    // 根據左右手設定圓圈顏色
+    if (hand.handedness === "Left") {
+      fill(255, 0, 255); // 左手圓圈顏色為粉紅色
+    } else if (hand.handedness === "Right") {
+      fill(255, 255, 0); // 右手圓圈顏色為黃色
+    }
+
     noStroke();
     circle(keypoint.x, keypoint.y, 10); // 繪製圓點
   }
