@@ -8,6 +8,7 @@ let circleX, circleY, circleRadius = 100;
 let isCircleGrabbed = false;
 let previousCircleX = null;
 let previousCircleY = null;
+let trails = []; // 用於存儲軌跡的陣列
 
 function preload() {
   // Initialize HandPose model with flipped video input
@@ -35,17 +36,17 @@ function draw() {
   image(video, 0, 0); // 顯示相機畫面
 
   // 繪製圓
-  fill(0, 0, 255, 100);
+  fill(0, 0, 255, 100); // 圓的顏色為藍色
   noStroke();
   circle(circleX, circleY, circleRadius * 2);
+
+  // 繪製軌跡
+  drawTrails();
 
   // 確保至少偵測到一隻手
   if (hands.length > 0) {
     for (let hand of hands) {
       if (hand.confidence > 0.1) {
-        // 繪製手部的線條
-        drawHandLines(hand);
-
         // 檢查是否抓住圓
         checkCircleGrab(hand);
       }
@@ -110,13 +111,14 @@ function checkCircleGrab(hand) {
 
     // 畫出圓心的軌跡
     if (previousCircleX !== null && previousCircleY !== null) {
-      if (hand.handedness === "Left") {
-        stroke(0, 255, 0); // 左手軌跡顏色為綠色
-      } else if (hand.handedness === "Right") {
-        stroke(255, 0, 0); // 右手軌跡顏色為紅色
-      }
-      strokeWeight(2);
-      line(previousCircleX, previousCircleY, circleX, circleY);
+      let color = hand.handedness === "Left" ? [0, 255, 0] : [255, 0, 0]; // 左手綠色，右手紅色
+      trails.push({
+        x1: previousCircleX,
+        y1: previousCircleY,
+        x2: circleX,
+        y2: circleY,
+        color: color
+      });
     }
 
     // 更新上一個圓心位置
@@ -125,8 +127,16 @@ function checkCircleGrab(hand) {
   } else {
     isCircleGrabbed = false;
 
-    // 如果手指離開圓，停止畫軌跡
+    // 如果手指離開圓，停止更新上一個位置
     previousCircleX = null;
     previousCircleY = null;
+  }
+}
+
+function drawTrails() {
+  for (let trail of trails) {
+    stroke(trail.color[0], trail.color[1], trail.color[2]); // 設定軌跡顏色
+    strokeWeight(10); // 設定線條粗細為 10
+    line(trail.x1, trail.y1, trail.x2, trail.y2); // 畫出軌跡
   }
 }
