@@ -11,10 +11,13 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(800, 600); // 建立畫布
+  // 設定相機尺寸
   video = createCapture(VIDEO); // 啟用相機
-  video.size(800, 600);
+  video.size(800, 600); // 設定相機畫面大小
   video.hide(); // 隱藏原始相機畫面
+
+  // 使用相機的寬高來設定畫布大小
+  createCanvas(video.width, video.height);
 
   // 啟用 HandPose 並設定回呼函式
   handPose.on("predict", gotHands);
