@@ -47,6 +47,9 @@ function draw() {
   if (hands.length > 0) {
     for (let hand of hands) {
       if (hand.confidence > 0.1) {
+        // 繪製手部的線條和圓點
+        drawHandLines(hand);
+
         // 檢查是否抓住圓
         checkCircleGrab(hand);
       }
@@ -71,7 +74,7 @@ function drawHandLines(hand) {
       let end = hand.keypoints[group[i + 1]];
 
       if (start && end) {
-        stroke(0, 255, 0); // 設定線條顏色
+        stroke(0, 255, 0); // 線條顏色為綠色
         strokeWeight(2);   // 設定線條粗細
         line(start.x, start.y, end.x, end.y); // 畫線
       }
