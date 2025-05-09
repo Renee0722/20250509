@@ -25,7 +25,8 @@ function gotHands(results) {
 }
 
 function draw() {
-  image(video, 0, 0); // 顯示相機畫面
+  // 顯示相機畫面
+  image(video, 0, 0); 
 
   // 確保至少偵測到一隻手
   if (hands.length > 0) {
