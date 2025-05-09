@@ -6,6 +6,8 @@ let handPose;
 let hands = [];
 let circleX, circleY, circleRadius = 100;
 let isCircleGrabbed = false;
+let previousCircleX = null;
+let previousCircleY = null;
 
 function preload() {
   // Initialize HandPose model with flipped video input
@@ -101,13 +103,30 @@ function checkCircleGrab(hand) {
 
   if (indexDist < circleRadius && thumbDist < circleRadius) {
     isCircleGrabbed = true;
-  } else {
-    isCircleGrabbed = false;
-  }
 
-  // 如果抓住圓，讓圓跟隨手指移動
-  if (isCircleGrabbed) {
+    // 如果抓住圓，讓圓跟隨手指移動
     circleX = (indexFinger.x + thumb.x) / 2;
     circleY = (indexFinger.y + thumb.y) / 2;
+
+    // 畫出圓心的軌跡
+    if (previousCircleX !== null && previousCircleY !== null) {
+      if (hand.handedness === "Left") {
+        stroke(0, 255, 0); // 左手軌跡顏色為綠色
+      } else if (hand.handedness === "Right") {
+        stroke(255, 0, 0); // 右手軌跡顏色為紅色
+      }
+      strokeWeight(2);
+      line(previousCircleX, previousCircleY, circleX, circleY);
+    }
+
+    // 更新上一個圓心位置
+    previousCircleX = circleX;
+    previousCircleY = circleY;
+  } else {
+    isCircleGrabbed = false;
+
+    // 如果手指離開圓，停止畫軌跡
+    previousCircleX = null;
+    previousCircleY = null;
   }
 }
